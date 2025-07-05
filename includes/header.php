@@ -41,29 +41,10 @@
     <!-- Beautiful Side Navbar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Top Header Bar -->
-    <div class="top-header">
-        <div class="header-left">
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="header-brand">
-                <i class="fas fa-cube brand-icon"></i>
-                <span class="brand-text">ERP System</span>
-            </div>
-        </div>
-        <div class="header-right">
-            <div class="header-user">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <span class="user-name">Admin</span>
-                <div class="user-dropdown">
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Hidden toggle button for mobile -->
+    <button class="sidebar-toggle mobile-only" id="sidebarToggle" style="display: none;">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <!-- Side Navigation -->
     <nav class="sidebar" id="sidebar">
@@ -93,88 +74,67 @@
                     </a>
                 </li>
 
-                <li class="nav-item has-submenu">
-                    <a href="#" class="nav-link submenu-toggle">
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>customer/" class="nav-link">
                         <div class="nav-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                        <span class="nav-text">Customers</span>
-                        <div class="nav-arrow">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
+                        <span class="nav-text">View All Customers</span>
                     </a>
-                    <ul class="submenu">
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>customer/" class="submenu-link">
-                                <i class="fas fa-list"></i>
-                                <span>View All Customers</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>customer/add.php" class="submenu-link">
-                                <i class="fas fa-plus"></i>
-                                <span>Add New Customer</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
-                <li class="nav-item has-submenu">
-                    <a href="#" class="nav-link submenu-toggle">
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>customer/add.php" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <span class="nav-text">Add New Customer</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>item/" class="nav-link">
                         <div class="nav-icon">
                             <i class="fas fa-boxes"></i>
                         </div>
-                        <span class="nav-text">Items</span>
-                        <div class="nav-arrow">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
+                        <span class="nav-text">View All Items</span>
                     </a>
-                    <ul class="submenu">
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>item/" class="submenu-link">
-                                <i class="fas fa-list"></i>
-                                <span>View All Items</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>item/add.php" class="submenu-link">
-                                <i class="fas fa-plus"></i>
-                                <span>Add New Item</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
-                <li class="nav-item has-submenu">
-                    <a href="#" class="nav-link submenu-toggle">
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>item/add.php" class="nav-link">
                         <div class="nav-icon">
-                            <i class="fas fa-chart-line"></i>
+                            <i class="fas fa-plus-circle"></i>
                         </div>
-                        <span class="nav-text">Reports</span>
-                        <div class="nav-arrow">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
+                        <span class="nav-text">Add New Item</span>
                     </a>
-                    <ul class="submenu">
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>reports/invoice_report.php" class="submenu-link">
-                                <i class="fas fa-file-invoice"></i>
-                                <span>Invoice Report</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>reports/invoice_item_report.php" class="submenu-link">
-                                <i class="fas fa-file-invoice-dollar"></i>
-                                <span>Invoice Item Report</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo getBaseUrl(); ?>reports/item_report.php" class="submenu-link">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Item Report</span>
-                            </a>
-                        </li>
-                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>reports/invoice_report.php" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <span class="nav-text">Invoice Report</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>reports/invoice_item_report.php" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <span class="nav-text">Invoice Item Report</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="<?php echo getBaseUrl(); ?>reports/item_report.php" class="nav-link">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <span class="nav-text">Item Report</span>
+                    </a>
                 </li>
             </ul>
 

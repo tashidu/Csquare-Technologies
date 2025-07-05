@@ -7,8 +7,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize sidebar functionality
     initializeSidebar();
     setActiveNavigation();
-    handleSubmenuToggle();
     addResponsiveHandling();
+
+    // Open sidebar by default on desktop
+    if (window.innerWidth > 768) {
+        openSidebar();
+    }
 });
 
 /**
@@ -103,75 +107,19 @@ function closeSidebar() {
     document.body.style.overflow = '';
 }
 
-/**
- * Handle submenu toggle
- */
-function handleSubmenuToggle() {
-    const submenuToggles = document.querySelectorAll('.submenu-toggle');
-
-    submenuToggles.forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            const navItem = this.closest('.nav-item');
-            const submenu = navItem.querySelector('.submenu');
-            const arrow = this.querySelector('.nav-arrow');
-
-            // Close other submenus
-            submenuToggles.forEach(otherToggle => {
-                if (otherToggle !== this) {
-                    const otherNavItem = otherToggle.closest('.nav-item');
-                    const otherSubmenu = otherNavItem.querySelector('.submenu');
-                    const otherArrow = otherToggle.querySelector('.nav-arrow');
-
-                    otherSubmenu.classList.remove('active');
-                    otherToggle.classList.remove('active');
-                    if (otherArrow) {
-                        otherArrow.style.transform = 'rotate(0deg)';
-                    }
-                }
-            });
-
-            // Toggle current submenu
-            submenu.classList.toggle('active');
-            this.classList.toggle('active');
-
-            if (arrow) {
-                arrow.style.transform = submenu.classList.contains('active')
-                    ? 'rotate(90deg)'
-                    : 'rotate(0deg)';
-            }
-        });
-    });
-}
+// Submenu functionality removed for simple flat navigation
 
 /**
  * Set active navigation based on current page
  */
 function setActiveNavigation() {
     const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.nav-link, .submenu-link');
+    const navLinks = document.querySelectorAll('.nav-link');
 
     navLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (href && isCurrentPage(currentPath, href)) {
             link.classList.add('active');
-
-            // If it's a submenu link, also activate parent and show submenu
-            if (link.classList.contains('submenu-link')) {
-                const navItem = link.closest('.nav-item');
-                const parentToggle = navItem.querySelector('.submenu-toggle');
-                const submenu = navItem.querySelector('.submenu');
-                const arrow = parentToggle.querySelector('.nav-arrow');
-
-                if (parentToggle) {
-                    parentToggle.classList.add('active');
-                    submenu.classList.add('active');
-                    if (arrow) {
-                        arrow.style.transform = 'rotate(90deg)';
-                    }
-                }
-            }
         }
     });
 }
