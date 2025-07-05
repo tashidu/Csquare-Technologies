@@ -138,25 +138,7 @@
                 </li>
             </ul>
 
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar-large">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="user-details">
-                        <h5>Administrator</h5>
-                        <p>admin@erp.com</p>
-                    </div>
-                </div>
-                <div class="footer-actions">
-                    <a href="#" class="footer-link" title="Settings">
-                        <i class="fas fa-cog"></i>
-                    </a>
-                    <a href="#" class="footer-link" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
-                </div>
-            </div>
+
         </div>
     </nav>
 
