@@ -32,6 +32,11 @@ $(document).ready(function() {
     initializeNonCriticalFeatures();
 });
 
+function initializeNonCriticalFeatures() {
+    // Initialize export features
+    initializeExportFeatures();
+}
+
 function initializeCriticalFeatures() {
     
     // Confirm delete actions
@@ -148,12 +153,16 @@ function downloadCSV(csv, filename) {
 
 // Function to show loading spinner
 function showLoading() {
+    console.log('Showing loading indicator');
     $('.loading').show();
+    $('#loadingIndicator').show();
 }
 
 // Function to hide loading spinner
 function hideLoading() {
+    console.log('Hiding loading indicator');
     $('.loading').hide();
+    $('#loadingIndicator').hide();
 }
 
 // Function to show success message
@@ -203,6 +212,183 @@ function formatDate(date) {
         month: 'long',
         day: 'numeric'
     });
+}
+
+// Function to handle PDF download
+function handlePDFDownload(element) {
+    console.log('handlePDFDownload called with URL:', element.href);
+
+    // Show loading indicator
+    const originalText = element.innerHTML;
+    element.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+    element.style.pointerEvents = 'none';
+
+    try {
+        const filename = 'report_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.pdf';
+
+        // Method 1: Try using fetch API for better control
+        fetch(element.href)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = filename;
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Clean up
+                window.URL.revokeObjectURL(downloadUrl);
+
+                console.log('PDF download triggered successfully via fetch');
+                element.innerHTML = originalText;
+                element.style.pointerEvents = 'auto';
+                showSuccess('PDF file downloaded successfully!');
+            })
+            .catch(error => {
+                console.warn('Fetch method failed, trying fallback:', error);
+                // Fallback method: Direct link approach
+                const link = document.createElement('a');
+                link.href = element.href;
+                link.download = filename;
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                console.log('PDF download triggered successfully via fallback');
+                element.innerHTML = originalText;
+                element.style.pointerEvents = 'auto';
+                showSuccess('PDF file downloaded successfully!');
+            });
+    } catch (error) {
+        console.error('Error in PDF export:', error);
+        element.innerHTML = originalText;
+        element.style.pointerEvents = 'auto';
+        showError('Error downloading PDF file: ' + error.message);
+    }
+
+    // Prevent default action
+    return false;
+}
+
+// Function to handle CSV export with proper download
+function handleCSVExport(url, filename) {
+    console.log('handleCSVExport called with:', url, filename);
+
+    // Show loading indicator
+    showLoading();
+
+    try {
+        // Method 1: Try using fetch API for better control
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = filename || 'export.csv';
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Clean up
+                window.URL.revokeObjectURL(downloadUrl);
+
+                console.log('CSV download triggered successfully via fetch');
+                hideLoading();
+                showSuccess('CSV file downloaded successfully!');
+            })
+            .catch(error => {
+                console.warn('Fetch method failed, trying fallback:', error);
+                // Fallback method: Direct link approach
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename || 'export.csv';
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                console.log('CSV download triggered successfully via fallback');
+                hideLoading();
+                showSuccess('CSV file downloaded successfully!');
+            });
+    } catch (error) {
+        console.error('Error in CSV export:', error);
+        hideLoading();
+        showError('Error downloading CSV file: ' + error.message);
+    }
+}
+
+// Enhanced export functionality
+function initializeExportFeatures() {
+    console.log('Initializing export features...');
+
+    // Debug: Check if elements exist
+    console.log('CSV links found:', $('.export-csv-link').length);
+    console.log('PDF links found:', $('.export-pdf-link').length);
+
+    // Handle CSV export links
+    $('.export-csv-link').on('click', function(e) {
+        e.preventDefault();
+        console.log('CSV export clicked');
+        const url = $(this).attr('href');
+        const filename = $(this).data('filename') || 'export.csv';
+        console.log('CSV URL:', url, 'Filename:', filename);
+        handleCSVExport(url, filename);
+    });
+
+    // Handle PDF export links
+    $('.export-pdf-link').on('click', function(e) {
+        e.preventDefault();
+        console.log('PDF export clicked');
+        console.log('PDF URL:', $(this).attr('href'));
+        return handlePDFDownload(this);
+    });
+
+    // Also add event delegation for dynamically added elements
+    $(document).on('click', '.export-csv-link', function(e) {
+        if (!$(this).data('handler-attached')) {
+            e.preventDefault();
+            console.log('CSV export clicked (delegated)');
+            const url = $(this).attr('href');
+            const filename = $(this).data('filename') || 'export.csv';
+            console.log('CSV URL:', url, 'Filename:', filename);
+            handleCSVExport(url, filename);
+        }
+    });
+
+    $(document).on('click', '.export-pdf-link', function(e) {
+        if (!$(this).data('handler-attached')) {
+            e.preventDefault();
+            console.log('PDF export clicked (delegated)');
+            console.log('PDF URL:', $(this).attr('href'));
+            return handlePDFDownload(this);
+        }
+    });
+
+    // Mark handlers as attached
+    $('.export-csv-link, .export-pdf-link').data('handler-attached', true);
 }
 
 // AJAX form submission helper

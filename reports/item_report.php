@@ -69,18 +69,40 @@ include '../includes/header.php';
 
                         <!-- Export Buttons -->
                         <div class="btn-group me-2" role="group">
-                            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="exportDropdown">
                                 <i class="fas fa-download"></i> Export
                             </button>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="export_item_report.php?format=csv&category=<?php echo $category_id; ?>" download>
-                                        <i class="fas fa-file-csv"></i> Export as CSV
+                                    <a class="dropdown-item export-csv-link"
+                                       href="export_item_report.php?format=csv&category=<?php echo $category_id ?? ''; ?>"
+                                       data-filename="item_report_<?php echo date('Y-m-d_H-i-s'); ?>.csv"
+                                       title="Download CSV file">
+                                        <i class="fas fa-file-csv text-success"></i> Export as CSV
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="export_item_report.php?format=pdf&category=<?php echo $category_id; ?>" target="_blank" onclick="handlePDFDownload(this)">
-                                        <i class="fas fa-file-pdf"></i> Export as PDF
+                                    <a class="dropdown-item export-pdf-link"
+                                       href="export_item_report.php?format=pdf&category=<?php echo $category_id ?? ''; ?>"
+                                       title="Download PDF file">
+                                        <i class="fas fa-file-pdf text-danger"></i> Export as PDF
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="export_item_report.php?format=csv&category=<?php echo $category_id ?? ''; ?>"
+                                       target="_blank"
+                                       title="Direct CSV download (if above doesn't work)">
+                                        <i class="fas fa-external-link-alt text-info"></i> Direct CSV Link
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="export_item_report.php?format=pdf&category=<?php echo $category_id ?? ''; ?>"
+                                       target="_blank"
+                                       title="Direct PDF download (if above doesn't work)">
+                                        <i class="fas fa-external-link-alt text-info"></i> Direct PDF Link
                                     </a>
                                 </li>
                             </ul>
@@ -89,6 +111,20 @@ include '../includes/header.php';
                         <button type="button" class="btn btn-outline-primary print-btn">
                             <i class="fas fa-print"></i> Print Report
                         </button>
+
+                        <!-- Simple Export Buttons (Fallback) -->
+                        <div class="btn-group ms-2" role="group">
+                            <a href="export_item_report.php?format=csv&category=<?php echo $category_id ?? ''; ?>"
+                               class="btn btn-success btn-sm"
+                               title="Download CSV file">
+                                <i class="fas fa-file-csv"></i> CSV
+                            </a>
+                            <a href="export_item_report.php?format=pdf&category=<?php echo $category_id ?? ''; ?>"
+                               class="btn btn-danger btn-sm"
+                               title="Download PDF file">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -347,5 +383,66 @@ include '../includes/header.php';
 </div>
 <?php endif; ?>
 <?php endif; ?>
+
+<!-- Loading Indicator -->
+<div class="loading" id="loadingIndicator">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Processing export...</p>
+</div>
+
+<script>
+// Debug script for export functionality
+$(document).ready(function() {
+    console.log('Item report page loaded');
+
+    // Check if Bootstrap is loaded
+    if (typeof bootstrap !== 'undefined') {
+        console.log('✅ Bootstrap is loaded');
+    } else {
+        console.log('❌ Bootstrap is not loaded');
+    }
+
+    // Check if jQuery is loaded
+    if (typeof $ !== 'undefined') {
+        console.log('✅ jQuery is loaded');
+    } else {
+        console.log('❌ jQuery is not loaded');
+    }
+
+    // Check export elements
+    setTimeout(function() {
+        const csvLinks = $('.export-csv-link');
+        const pdfLinks = $('.export-pdf-link');
+        const dropdownBtn = $('#exportDropdown');
+
+        console.log('Export elements found:');
+        console.log('- CSV links:', csvLinks.length);
+        console.log('- PDF links:', pdfLinks.length);
+        console.log('- Dropdown button:', dropdownBtn.length);
+
+        if (csvLinks.length > 0) {
+            console.log('CSV link href:', csvLinks.first().attr('href'));
+        }
+
+        if (pdfLinks.length > 0) {
+            console.log('PDF link href:', pdfLinks.first().attr('href'));
+        }
+
+        // Test dropdown functionality
+        dropdownBtn.on('click', function() {
+            console.log('Dropdown button clicked');
+        });
+
+        // Test export links
+        $('.export-csv-link, .export-pdf-link').on('click', function(e) {
+            console.log('Export link clicked:', $(this).attr('href'));
+            console.log('Event prevented:', e.isDefaultPrevented());
+        });
+
+    }, 1000);
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>

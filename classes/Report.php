@@ -457,7 +457,7 @@ class Report {
             ]);
         }
 
-        $pdf->outputAsBeautifulPDF();
+        $pdf->outputAsPDF();
         exit;
     }
 
@@ -494,7 +494,7 @@ class Report {
             ]);
         }
 
-        $pdf->outputAsBeautifulPDF();
+        $pdf->outputAsPDF();
         exit;
     }
 
@@ -553,7 +553,7 @@ class Report {
             }
         }
 
-        $pdf->outputAsBeautifulPDF();
+        $pdf->outputAsPDF();
         exit;
     }
 
