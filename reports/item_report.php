@@ -27,14 +27,6 @@ include '../includes/header.php';
 
 <div class="row">
     <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="../">Dashboard</a></li>
-                <li class="breadcrumb-item">Reports</li>
-                <li class="breadcrumb-item active">Item Report</li>
-            </ol>
-        </nav>
-        
         <h1 class="mb-4">
             <i class="fas fa-boxes"></i> Item Report
         </h1>
@@ -82,12 +74,12 @@ include '../includes/header.php';
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item" href="export_item_report.php?format=csv&category=<?php echo $category_id; ?>">
+                                    <a class="dropdown-item" href="export_item_report.php?format=csv&category=<?php echo $category_id; ?>" download>
                                         <i class="fas fa-file-csv"></i> Export as CSV
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="export_item_report.php?format=pdf&category=<?php echo $category_id; ?>">
+                                    <a class="dropdown-item" href="export_item_report.php?format=pdf&category=<?php echo $category_id; ?>" target="_blank" onclick="handlePDFDownload(this)">
                                         <i class="fas fa-file-pdf"></i> Export as PDF
                                     </a>
                                 </li>

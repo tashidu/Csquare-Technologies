@@ -66,20 +66,43 @@ class PDFGenerator {
      * Generate beautiful HTML-based PDF that downloads directly
      */
     public function outputAsBeautifulPDF() {
-        // Set headers for PDF download
-        header('Content-Type: text/html; charset=utf-8');
-        header('Content-Disposition: inline; filename="' . $this->filename . '"');
-
         // Generate beautiful HTML
         $html = $this->generateBeautifulHTML();
+
+        // Set headers for HTML display with print functionality
+        header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+
         echo $html;
 
-        // Add auto-print JavaScript
+        // Add enhanced auto-print JavaScript with download simulation
         echo '<script>
             window.onload = function() {
+                // Add download instruction
+                var downloadMsg = document.createElement("div");
+                downloadMsg.style.cssText = "position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 15px 20px; border-radius: 8px; z-index: 10000; font-family: Arial, sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3);";
+                downloadMsg.innerHTML = "<strong>📄 PDF Ready!</strong><br>Press <kbd>Ctrl+P</kbd> then choose <em>Save as PDF</em><br><small>This window will auto-close after printing</small>";
+                document.body.appendChild(downloadMsg);
+
+                // Auto-trigger print dialog
                 setTimeout(function() {
                     window.print();
-                }, 500);
+
+                    // Close window after print dialog (if opened in new window)
+                    setTimeout(function() {
+                        if (window.opener) {
+                            window.close();
+                        }
+                    }, 1000);
+                }, 800);
+
+                // Handle print completion
+                window.addEventListener("afterprint", function() {
+                    if (window.opener) {
+                        window.close();
+                    }
+                });
             }
         </script>';
     }

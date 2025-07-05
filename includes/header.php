@@ -38,7 +38,7 @@
     }
     ?>
     
-    <!-- Beautiful Side Navbar -->
+    <!-- Modern Side Navbar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Hidden toggle button for mobile -->
@@ -48,97 +48,77 @@
 
     <!-- Side Navigation -->
     <nav class="sidebar" id="sidebar">
+        <!-- Company Branding Section -->
         <div class="sidebar-header">
-            <div class="sidebar-brand">
-                <div class="brand-icon">
-                    <i class="fas fa-cube"></i>
+            <div class="company-brand">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
                 </div>
-                <div class="brand-info">
-                    <h4>ERP System</h4>
-                    <p>Management Portal</p>
+                <div class="company-info">
+                    <h3 class="company-name">ERP System</h3>
                 </div>
             </div>
-            <button class="sidebar-close" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
 
+        <!-- Navigation Menu -->
         <div class="sidebar-menu">
             <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-tachometer-alt"></i>
-                        </div>
+                        <i class="fas fa-tachometer-alt nav-icon"></i>
                         <span class="nav-text">Dashboard</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>customer/" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <span class="nav-text">View All Customers</span>
+                        <i class="fas fa-users nav-icon"></i>
+                        <span class="nav-text">Customer Management</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>customer/add.php" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <span class="nav-text">Add New Customer</span>
+                        <i class="fas fa-user-plus nav-icon"></i>
+                        <span class="nav-text">Add Customer</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>item/" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-boxes"></i>
-                        </div>
-                        <span class="nav-text">View All Items</span>
+                        <i class="fas fa-boxes nav-icon"></i>
+                        <span class="nav-text">Item Management</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>item/add.php" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <span class="nav-text">Add New Item</span>
+                        <i class="fas fa-plus-circle nav-icon"></i>
+                        <span class="nav-text">Add Item</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>reports/invoice_report.php" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-file-invoice"></i>
-                        </div>
+                        <i class="fas fa-file-invoice nav-icon"></i>
                         <span class="nav-text">Invoice Report</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>reports/invoice_item_report.php" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                        </div>
+                        <i class="fas fa-file-invoice-dollar nav-icon"></i>
                         <span class="nav-text">Invoice Item Report</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a href="<?php echo getBaseUrl(); ?>reports/item_report.php" class="nav-link">
-                        <div class="nav-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
+                        <i class="fas fa-chart-bar nav-icon"></i>
                         <span class="nav-text">Item Report</span>
                     </a>
                 </li>
             </ul>
-
-
         </div>
     </nav>
 

@@ -39,14 +39,6 @@ include '../includes/header.php';
 
 <div class="row">
     <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="../">Dashboard</a></li>
-                <li class="breadcrumb-item">Reports</li>
-                <li class="breadcrumb-item active">Invoice Report</li>
-            </ol>
-        </nav>
-        
         <h1 class="mb-4">
             <i class="fas fa-file-invoice"></i> Invoice Report
         </h1>
