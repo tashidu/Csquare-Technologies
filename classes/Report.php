@@ -414,9 +414,9 @@ class Report {
             if (!in_array($item['item_name'], $processed_items)) {
                 fputcsv($output, [
                     $item['item_name'],
-                    $item['category'] ?? 'N/A',
-                    $item['sub_category'] ?? 'N/A',
-                    $item['quantity']
+                    $item['item_category'] ?? 'N/A',
+                    $item['item_subcategory'] ?? 'N/A',
+                    $item['item_quantity']
                 ]);
                 $processed_items[] = $item['item_name'];
             }
@@ -427,28 +427,51 @@ class Report {
     }
 
     /**
-     * Export invoice report to PDF (Print-friendly HTML)
+     * Export invoice report to PDF
      */
     public function exportInvoiceReportPDF($start_date = null, $end_date = null, $customer_id = null) {
+        require_once __DIR__ . '/PDFGenerator.php';
+
         $invoices = $this->getInvoiceReport($start_date, $end_date, $customer_id);
 
-        $this->generatePrintableHTML('Invoice Report', [
+        $pdf = new PDFGenerator('Invoice Report');
+        $pdf->setFilename('invoice_report_' . date('Y-m-d_H-i-s') . '.pdf');
+        $pdf->setHeaders([
             'Invoice Number',
             'Date',
             'Customer',
             'Customer District',
             'Item Count',
             'Invoice Amount'
-        ], $invoices, 'invoice_report');
+        ]);
+
+        // Add data rows
+        while ($invoice = $invoices->fetch_assoc()) {
+            $pdf->addRow([
+                $invoice['invoice_no'],
+                $invoice['formatted_date'],
+                $invoice['customer_name'] ?? 'N/A',
+                $invoice['customer_district'] ?? 'N/A',
+                $invoice['item_count'],
+                'LKR ' . number_format($invoice['amount'], 2)
+            ]);
+        }
+
+        $pdf->outputAsBeautifulPDF();
+        exit;
     }
 
     /**
-     * Export invoice item report to PDF (Print-friendly HTML)
+     * Export invoice item report to PDF
      */
     public function exportInvoiceItemReportPDF($start_date = null, $end_date = null, $invoice_no = null, $item_id = null) {
+        require_once __DIR__ . '/PDFGenerator.php';
+
         $invoice_items = $this->getInvoiceItemReport($start_date, $end_date, $invoice_no, $item_id);
 
-        $this->generatePrintableHTML('Invoice Item Report', [
+        $pdf = new PDFGenerator('Invoice Item Report');
+        $pdf->setFilename('invoice_item_report_' . date('Y-m-d_H-i-s') . '.pdf');
+        $pdf->setHeaders([
             'Invoice Number',
             'Invoiced Date',
             'Customer Name',
@@ -456,21 +479,82 @@ class Report {
             'Item Code',
             'Item Category',
             'Item Unit Price'
-        ], $invoice_items, 'invoice_item_report');
+        ]);
+
+        // Add data rows
+        while ($item = $invoice_items->fetch_assoc()) {
+            $pdf->addRow([
+                $item['invoice_no'],
+                $item['formatted_date'],
+                $item['customer_name'] ?? 'N/A',
+                $item['item_name'] ?? 'N/A',
+                $item['item_code'] ?? 'N/A',
+                $item['item_category'] ?? 'N/A',
+                'LKR ' . number_format($item['unit_price'], 2)
+            ]);
+        }
+
+        $pdf->outputAsBeautifulPDF();
+        exit;
     }
 
     /**
-     * Export item report to PDF (Print-friendly HTML)
+     * Export item report to PDF
      */
     public function exportItemReportPDF($category_id = null) {
+        require_once __DIR__ . '/PDFGenerator.php';
+
         $items = $this->getItemReport($category_id);
 
-        $this->generatePrintableHTML('Item Report', [
+        $pdf = new PDFGenerator('Item Inventory Report');
+        $pdf->setFilename('item_report_' . date('Y-m-d_H-i-s') . '.pdf');
+        $pdf->setHeaders([
             'Item Name',
-            'Item Category',
-            'Item Sub Category',
-            'Item Quantity'
-        ], $items, 'item_report');
+            'Item Code',
+            'Category',
+            'Sub Category',
+            'Quantity',
+            'Unit Price',
+            'Total Value',
+            'Stock Status'
+        ]);
+
+        // Add data rows with enhanced formatting
+        $processed_items = [];
+        while ($item = $items->fetch_assoc()) {
+            // Avoid duplicate item names
+            if (!in_array($item['item_name'], $processed_items)) {
+                $quantity = intval($item['item_quantity']);
+                $unit_price = floatval($item['unit_price']);
+                $total_value = floatval($item['total_value']);
+
+                // Determine stock status
+                if ($quantity == 0) {
+                    $stock_status = '🔴 Out of Stock';
+                } elseif ($quantity < 10) {
+                    $stock_status = '🟡 Low Stock';
+                } elseif ($quantity < 50) {
+                    $stock_status = '🔵 Medium Stock';
+                } else {
+                    $stock_status = '🟢 Good Stock';
+                }
+
+                $pdf->addRow([
+                    $item['item_name'],
+                    $item['item_code'] ?? 'N/A',
+                    $item['item_category'] ?? 'Uncategorized',
+                    $item['item_subcategory'] ?? 'N/A',
+                    number_format($quantity),
+                    'LKR ' . number_format($unit_price, 2),
+                    'LKR ' . number_format($total_value, 2),
+                    $stock_status
+                ]);
+                $processed_items[] = $item['item_name'];
+            }
+        }
+
+        $pdf->outputAsBeautifulPDF();
+        exit;
     }
 
     /**
@@ -620,9 +704,9 @@ class Report {
                                 <td>LKR <?php echo number_format($row['unit_price'], 2); ?></td>
                             <?php elseif ($report_type === 'item_report'): ?>
                                 <td><?php echo htmlspecialchars($row['item_name']); ?></td>
-                                <td><?php echo htmlspecialchars($row['category'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($row['sub_category'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($row['quantity']); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_category'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_subcategory'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_quantity']); ?></td>
                             <?php endif; ?>
                         </tr>
                     <?php endwhile; ?>

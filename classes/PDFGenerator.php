@@ -61,6 +61,28 @@ class PDFGenerator {
             }
         </script>';
     }
+
+    /**
+     * Generate beautiful HTML-based PDF that downloads directly
+     */
+    public function outputAsBeautifulPDF() {
+        // Set headers for PDF download
+        header('Content-Type: text/html; charset=utf-8');
+        header('Content-Disposition: inline; filename="' . $this->filename . '"');
+
+        // Generate beautiful HTML
+        $html = $this->generateBeautifulHTML();
+        echo $html;
+
+        // Add auto-print JavaScript
+        echo '<script>
+            window.onload = function() {
+                setTimeout(function() {
+                    window.print();
+                }, 500);
+            }
+        </script>';
+    }
     
     private function generateHTML() {
         $html = '<!DOCTYPE html>
@@ -153,7 +175,306 @@ class PDFGenerator {
         
         return $html;
     }
-    
+
+    /**
+     * Generate beautiful, professional HTML for PDF
+     */
+    private function generateBeautifulHTML() {
+        $html = '<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>' . htmlspecialchars($this->title) . '</title>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; }
+            .page-break { page-break-before: always; }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            border-bottom: 3px solid #007bff;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .date {
+            font-size: 14px;
+            color: #495057;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px solid #dee2e6;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .report-table thead {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .report-table th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .report-table th:last-child {
+            border-right: none;
+        }
+
+        .report-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .report-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .report-table tbody tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        .report-table td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .report-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-top: 3px solid #007bff;
+        }
+
+        .footer p {
+            color: #6c757d;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .company-info {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 14px;
+        }
+
+        .stats-summary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .stats-summary h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .no-print {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <strong>📄 PDF Export Ready!</strong> Press <kbd>Ctrl+P</kbd> (Windows) or <kbd>Cmd+P</kbd> (Mac) to save as PDF, or use your browser\'s print function.
+    </div>
+
+    <div class="header">
+        <div class="title">' . htmlspecialchars($this->title) . '</div>
+        <div class="subtitle">Professional Report Generated by ERP System</div>
+        <div class="date">📅 Generated on: ' . date('F j, Y \a\t g:i A') . '</div>
+    </div>';
+
+        // Add enhanced summary stats if it's an item report
+        if (strpos(strtolower($this->title), 'item') !== false) {
+            $total_items = count($this->data);
+            $total_quantity = 0;
+            $total_value = 0;
+            $out_of_stock = 0;
+            $low_stock = 0;
+            $good_stock = 0;
+
+            foreach ($this->data as $row) {
+                // Quantity is in column 4 (index 4)
+                if (isset($row[4])) {
+                    $qty_str = str_replace(',', '', $row[4]);
+                    if (is_numeric($qty_str)) {
+                        $quantity = intval($qty_str);
+                        $total_quantity += $quantity;
+
+                        // Count stock levels
+                        if ($quantity == 0) {
+                            $out_of_stock++;
+                        } elseif ($quantity < 10) {
+                            $low_stock++;
+                        } else {
+                            $good_stock++;
+                        }
+                    }
+                }
+
+                // Total value is in column 6 (index 6)
+                if (isset($row[6])) {
+                    $value_str = str_replace(['LKR ', ','], '', $row[6]);
+                    if (is_numeric($value_str)) {
+                        $total_value += floatval($value_str);
+                    }
+                }
+            }
+
+            $html .= '<div class="stats-summary">
+                <h3>📊 Inventory Summary Dashboard</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold;">' . $total_items . '</div>
+                        <div style="font-size: 14px;">Total Items</div>
+                    </div>
+                    <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold;">' . number_format($total_quantity) . '</div>
+                        <div style="font-size: 14px;">Total Quantity</div>
+                    </div>
+                    <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold;">LKR ' . number_format($total_value, 2) . '</div>
+                        <div style="font-size: 14px;">Total Value</div>
+                    </div>
+                    <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        <div style="font-size: 18px;">🟢 ' . $good_stock . ' | 🟡 ' . $low_stock . ' | 🔴 ' . $out_of_stock . '</div>
+                        <div style="font-size: 14px;">Stock Status</div>
+                    </div>
+                </div>
+            </div>';
+        }
+
+        $html .= '<table class="report-table">
+        <thead>
+            <tr>';
+
+        foreach ($this->headers as $header) {
+            $html .= '<th>' . htmlspecialchars($header) . '</th>';
+        }
+
+        $html .= '</tr>
+        </thead>
+        <tbody>';
+
+        foreach ($this->data as $row) {
+            $html .= '<tr>';
+            foreach ($row as $index => $cell) {
+                $cell_content = htmlspecialchars($cell);
+
+                // Special formatting for item reports
+                if (strpos(strtolower($this->title), 'item') !== false) {
+                    // Stock Status column (last column)
+                    if ($index == count($row) - 1) {
+                        if (strpos($cell, '🔴') !== false) {
+                            $cell_content = '<span style="color: #dc3545; font-weight: bold;">' . $cell_content . '</span>';
+                        } elseif (strpos($cell, '🟡') !== false) {
+                            $cell_content = '<span style="color: #ffc107; font-weight: bold;">' . $cell_content . '</span>';
+                        } elseif (strpos($cell, '🟢') !== false) {
+                            $cell_content = '<span style="color: #28a745; font-weight: bold;">' . $cell_content . '</span>';
+                        } elseif (strpos($cell, '🔵') !== false) {
+                            $cell_content = '<span style="color: #007bff; font-weight: bold;">' . $cell_content . '</span>';
+                        }
+                    }
+                    // Monetary values (Unit Price and Total Value columns)
+                    elseif (strpos($cell, 'LKR') !== false) {
+                        $cell_content = '<span style="color: #28a745; font-weight: 600;">' . $cell_content . '</span>';
+                    }
+                    // Item Code column
+                    elseif ($index == 1) {
+                        $cell_content = '<code style="background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-size: 11px;">' . $cell_content . '</code>';
+                    }
+                    // Quantity column
+                    elseif ($index == 4) {
+                        $cell_content = '<span style="font-weight: 600; color: #495057;">' . $cell_content . '</span>';
+                    }
+                }
+
+                $html .= '<td>' . $cell_content . '</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>
+    </table>
+
+    <div class="footer">
+        <p class="company-info">🏢 Csquare Technologies ERP System</p>
+        <p>Report generated on ' . date('Y-m-d H:i:s') . '</p>
+        <p>© ' . date('Y') . ' All rights reserved</p>
+    </div>
+</body>
+</html>';
+
+        return $html;
+    }
+
     /**
      * Alternative output method that creates a proper PDF file
      * Uses a simple text-based PDF generation approach
