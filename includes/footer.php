@@ -1,4 +1,5 @@
-    </div> <!-- End container-fluid -->
+        </div> <!-- End content-wrapper -->
+    </div> <!-- End main-content -->
     
     <!-- Footer -->
     <footer class="bg-dark text-light mt-5 py-4">
