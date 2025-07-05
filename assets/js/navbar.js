@@ -3,11 +3,25 @@
  * Handles sidebar interactions and animations
  */
 
+// IMMEDIATELY disable all animations - before DOM loads
+(function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .nav-loading, .nav-loading::before, .nav-loading::after {
+            display: none !important;
+            animation: none !important;
+        }
+        .nav-link { animation: none !important; transition: none !important; }
+    `;
+    document.head.appendChild(style);
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize sidebar functionality
     initializeSidebar();
     setActiveNavigation();
     addResponsiveHandling();
+    addFastNavigation();
 
     // Open sidebar by default on desktop
     if (window.innerWidth > 768) {
@@ -25,7 +39,7 @@ function initializeSidebar() {
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const mainContent = document.querySelector('.main-content');
 
-    // Toggle sidebar
+    // Toggle sidebar (only for mobile toggle button)
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function() {
             toggleSidebar();
@@ -170,7 +184,51 @@ function addBreadcrumb(activePageName) {
 }
 
 /**
- * Add responsive handling
+ * Add navigation handling - NO ANIMATIONS AT ALL
+ */
+function addFastNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    navLinks.forEach(link => {
+        // Remove ALL animations and loading states on click
+        link.addEventListener('click', function(e) {
+            // Check if clicking the same page - prevent reload
+            const currentPath = window.location.pathname;
+            const linkHref = this.getAttribute('href');
+
+            if (linkHref && isCurrentPage(currentPath, linkHref)) {
+                e.preventDefault(); // Don't reload the same page
+                return false;
+            }
+
+            // Remove any loading states immediately - NO ANIMATIONS
+            document.querySelectorAll('.nav-loading').forEach(el => {
+                el.classList.remove('nav-loading');
+                el.style.animation = 'none';
+                el.style.background = '';
+                el.style.transform = '';
+            });
+
+            // NO visual effects - just navigate instantly
+            this.style.animation = 'none';
+            this.style.transition = 'none';
+        });
+
+        // Preload on hover for instant navigation
+        link.addEventListener('mouseenter', function() {
+            const href = this.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                const preloadLink = document.createElement('link');
+                preloadLink.rel = 'prefetch';
+                preloadLink.href = href;
+                document.head.appendChild(preloadLink);
+            }
+        });
+    });
+}
+
+/**
+ * Add responsive handling (optimized)
  */
 function addResponsiveHandling() {
     let resizeTimer;
@@ -198,7 +256,7 @@ function addResponsiveHandling() {
                     document.body.style.overflow = 'hidden';
                 }
             }
-        }, 250);
+        }, 100); // Reduced from 250ms to 100ms for faster response
     });
 }
 
@@ -313,5 +371,89 @@ function addScrollToTop() {
 // Initialize scroll to top
 addScrollToTop();
 
+// Optimize page loading performance
+optimizePageLoading();
+
 // Example: Add notification badges
 // addNotificationBadge('#reportsDropdown', 3);
+
+/**
+ * Optimize page loading - REMOVE ALL ANIMATIONS IMMEDIATELY
+ */
+function optimizePageLoading() {
+    // IMMEDIATELY remove ALL loading states and animations
+    document.querySelectorAll('.nav-loading, [class*="loading"], [class*="shimmer"]').forEach(element => {
+        element.classList.remove('nav-loading');
+        element.style.display = 'none';
+        element.style.animation = 'none';
+        element.style.background = 'transparent';
+        element.style.transform = 'none';
+        element.style.transition = 'none';
+        element.style.opacity = '1';
+    });
+
+    // Remove ALL pseudo-element animations
+    const allNavLinks = document.querySelectorAll('.nav-link');
+    allNavLinks.forEach(link => {
+        link.style.animation = 'none';
+        link.style.transition = 'none';
+        link.style.transform = 'none';
+    });
+
+    // Preload critical navigation pages for instant loading
+    const criticalPages = [
+        'customer/',
+        'item/',
+        'reports/invoice_report.php',
+        'customer/add.php',
+        'item/add.php'
+    ];
+
+    criticalPages.forEach(page => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = getBaseUrl() + page;
+        document.head.appendChild(link);
+    });
+
+    // COMPLETELY DISABLE ALL NAVIGATION ANIMATIONS
+    const style = document.createElement('style');
+    style.textContent = `
+        /* DISABLE ALL NAVBAR ANIMATIONS */
+        .nav-loading,
+        .nav-loading::before,
+        .nav-loading::after,
+        .nav-link::before,
+        .nav-link::after {
+            display: none !important;
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+        }
+
+        .nav-link,
+        .nav-link:hover,
+        .nav-link:active,
+        .nav-link:focus {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+        }
+
+        /* Remove shimmer completely */
+        *[class*="shimmer"],
+        *[class*="loading"] {
+            animation: none !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Override global loading functions for navigation
+    if (typeof window.showLoading === 'function') {
+        window.originalShowLoading = window.showLoading;
+        window.showLoading = function() {
+            // Skip loading for navigation - always fast
+            return;
+        };
+    }
+}

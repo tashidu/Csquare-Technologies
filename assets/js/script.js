@@ -1,25 +1,38 @@
 // Main JavaScript file for ERP System
 
 $(document).ready(function() {
-    // Initialize DataTables if available
-    if ($.fn.DataTable) {
-        $('.data-table').DataTable({
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-            language: {
-                search: "Search:",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous"
-                }
-            }
-        });
-    }
+    // Initialize critical functionality first
+    initializeCriticalFeatures();
+
+    // Initialize DataTables with delay to not block page loading
+    setTimeout(function() {
+        if ($.fn.DataTable && $('.data-table').length > 0) {
+            $('.data-table').DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                deferRender: true,
+                processing: false
+            });
+        }
+    }, 100); // Small delay to not block initial page rendering
+
+    // Initialize non-critical features
+    initializeNonCriticalFeatures();
+});
+
+function initializeCriticalFeatures() {
     
     // Confirm delete actions
     $('.delete-btn').on('click', function(e) {
