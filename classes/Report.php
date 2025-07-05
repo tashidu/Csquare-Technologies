@@ -300,10 +300,342 @@ class Report {
      * Get all items for filter dropdown
      */
     public function getAllItems() {
-        $sql = "SELECT id, CONCAT(item_code, ' - ', item_name) as name 
-                FROM item 
+        $sql = "SELECT id, CONCAT(item_code, ' - ', item_name) as name
+                FROM item
                 ORDER BY item_name";
         return $this->db->query($sql);
+    }
+
+    /**
+     * Export invoice report to CSV
+     */
+    public function exportInvoiceReportCSV($start_date = null, $end_date = null, $customer_id = null) {
+        $invoices = $this->getInvoiceReport($start_date, $end_date, $customer_id);
+
+        $filename = 'invoice_report_' . date('Y-m-d_H-i-s') . '.csv';
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        // CSV Headers
+        fputcsv($output, [
+            'Invoice Number',
+            'Date',
+            'Customer',
+            'Customer District',
+            'Item Count',
+            'Invoice Amount'
+        ]);
+
+        // CSV Data
+        while ($invoice = $invoices->fetch_assoc()) {
+            fputcsv($output, [
+                $invoice['invoice_no'],
+                $invoice['formatted_date'],
+                $invoice['customer_name'] ?? 'N/A',
+                $invoice['customer_district'] ?? 'N/A',
+                $invoice['item_count'],
+                number_format($invoice['amount'], 2)
+            ]);
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * Export invoice item report to CSV
+     */
+    public function exportInvoiceItemReportCSV($start_date = null, $end_date = null, $invoice_no = null, $item_id = null) {
+        $invoice_items = $this->getInvoiceItemReport($start_date, $end_date, $invoice_no, $item_id);
+
+        $filename = 'invoice_item_report_' . date('Y-m-d_H-i-s') . '.csv';
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        // CSV Headers
+        fputcsv($output, [
+            'Invoice Number',
+            'Invoiced Date',
+            'Customer Name',
+            'Item Name',
+            'Item Code',
+            'Item Category',
+            'Item Unit Price'
+        ]);
+
+        // CSV Data
+        while ($item = $invoice_items->fetch_assoc()) {
+            fputcsv($output, [
+                $item['invoice_no'],
+                $item['formatted_date'],
+                $item['customer_name'] ?? 'N/A',
+                $item['item_name'] ?? 'N/A',
+                $item['item_code'] ?? 'N/A',
+                $item['item_category'] ?? 'N/A',
+                number_format($item['unit_price'], 2)
+            ]);
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * Export item report to CSV
+     */
+    public function exportItemReportCSV($category_id = null) {
+        $items = $this->getItemReport($category_id);
+
+        $filename = 'item_report_' . date('Y-m-d_H-i-s') . '.csv';
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        // CSV Headers
+        fputcsv($output, [
+            'Item Name',
+            'Item Category',
+            'Item Sub Category',
+            'Item Quantity'
+        ]);
+
+        // CSV Data
+        $processed_items = [];
+        while ($item = $items->fetch_assoc()) {
+            // Avoid duplicate item names
+            if (!in_array($item['item_name'], $processed_items)) {
+                fputcsv($output, [
+                    $item['item_name'],
+                    $item['category'] ?? 'N/A',
+                    $item['sub_category'] ?? 'N/A',
+                    $item['quantity']
+                ]);
+                $processed_items[] = $item['item_name'];
+            }
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * Export invoice report to PDF (Print-friendly HTML)
+     */
+    public function exportInvoiceReportPDF($start_date = null, $end_date = null, $customer_id = null) {
+        $invoices = $this->getInvoiceReport($start_date, $end_date, $customer_id);
+
+        $this->generatePrintableHTML('Invoice Report', [
+            'Invoice Number',
+            'Date',
+            'Customer',
+            'Customer District',
+            'Item Count',
+            'Invoice Amount'
+        ], $invoices, 'invoice_report');
+    }
+
+    /**
+     * Export invoice item report to PDF (Print-friendly HTML)
+     */
+    public function exportInvoiceItemReportPDF($start_date = null, $end_date = null, $invoice_no = null, $item_id = null) {
+        $invoice_items = $this->getInvoiceItemReport($start_date, $end_date, $invoice_no, $item_id);
+
+        $this->generatePrintableHTML('Invoice Item Report', [
+            'Invoice Number',
+            'Invoiced Date',
+            'Customer Name',
+            'Item Name',
+            'Item Code',
+            'Item Category',
+            'Item Unit Price'
+        ], $invoice_items, 'invoice_item_report');
+    }
+
+    /**
+     * Export item report to PDF (Print-friendly HTML)
+     */
+    public function exportItemReportPDF($category_id = null) {
+        $items = $this->getItemReport($category_id);
+
+        $this->generatePrintableHTML('Item Report', [
+            'Item Name',
+            'Item Category',
+            'Item Sub Category',
+            'Item Quantity'
+        ], $items, 'item_report');
+    }
+
+    /**
+     * Generate print-friendly HTML for PDF export
+     */
+    private function generatePrintableHTML($title, $headers, $data, $report_type) {
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title><?php echo htmlspecialchars($title); ?></title>
+            <style>
+                @media print {
+                    .no-print { display: none !important; }
+                    body { margin: 0; }
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #333;
+                    padding-bottom: 15px;
+                }
+                .title {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                    color: #333;
+                }
+                .date {
+                    font-size: 12px;
+                    color: #666;
+                }
+                .instructions {
+                    background: #e3f2fd;
+                    border: 1px solid #2196f3;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                    text-align: center;
+                }
+                .instructions strong {
+                    color: #1976d2;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    font-size: 11px;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                    word-wrap: break-word;
+                }
+                th {
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                    color: #333;
+                }
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                tr:hover {
+                    background-color: #f5f5f5;
+                }
+                .footer {
+                    margin-top: 30px;
+                    text-align: center;
+                    font-size: 10px;
+                    color: #666;
+                    border-top: 1px solid #ddd;
+                    padding-top: 15px;
+                }
+                .print-button {
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    margin: 10px;
+                }
+                .print-button:hover {
+                    background: #0056b3;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="instructions no-print">
+                <strong>PDF Export Instructions:</strong><br>
+                Press <strong>Ctrl+P</strong> (Windows) or <strong>Cmd+P</strong> (Mac) to print this page as PDF.<br>
+                In the print dialog, select "Save as PDF" as your destination.
+                <br><br>
+                <button class="print-button" onclick="window.print()">🖨️ Print / Save as PDF</button>
+                <button class="print-button" onclick="window.close()">❌ Close</button>
+            </div>
+
+            <div class="header">
+                <div class="title"><?php echo htmlspecialchars($title); ?></div>
+                <div class="date">Generated on: <?php echo date('Y-m-d H:i:s'); ?></div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <?php foreach ($headers as $header): ?>
+                            <th><?php echo htmlspecialchars($header); ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $processed_items = [];
+                    while ($row = $data->fetch_assoc()):
+                        // Handle item report duplicate prevention
+                        if ($report_type === 'item_report') {
+                            if (in_array($row['item_name'], $processed_items)) {
+                                continue;
+                            }
+                            $processed_items[] = $row['item_name'];
+                        }
+                    ?>
+                        <tr>
+                            <?php if ($report_type === 'invoice_report'): ?>
+                                <td><?php echo htmlspecialchars($row['invoice_no']); ?></td>
+                                <td><?php echo htmlspecialchars($row['formatted_date']); ?></td>
+                                <td><?php echo htmlspecialchars($row['customer_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['customer_district'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_count']); ?></td>
+                                <td>LKR <?php echo number_format($row['amount'], 2); ?></td>
+                            <?php elseif ($report_type === 'invoice_item_report'): ?>
+                                <td><?php echo htmlspecialchars($row['invoice_no']); ?></td>
+                                <td><?php echo htmlspecialchars($row['formatted_date']); ?></td>
+                                <td><?php echo htmlspecialchars($row['customer_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_code'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['item_category'] ?? 'N/A'); ?></td>
+                                <td>LKR <?php echo number_format($row['unit_price'], 2); ?></td>
+                            <?php elseif ($report_type === 'item_report'): ?>
+                                <td><?php echo htmlspecialchars($row['item_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['category'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['sub_category'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['quantity']); ?></td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <p>Report generated by ERP System - <?php echo date('Y-m-d H:i:s'); ?></p>
+            </div>
+        </body>
+        </html>
+        <?php
+        exit;
     }
 }
 ?>

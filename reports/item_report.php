@@ -74,9 +74,26 @@ include '../includes/header.php';
                         <a href="item_report.php" class="btn btn-outline-secondary me-2">
                             <i class="fas fa-refresh"></i> Reset Filters
                         </a>
-                        <button type="button" class="btn btn-outline-success me-2 export-csv">
-                            <i class="fas fa-download"></i> Export CSV
-                        </button>
+
+                        <!-- Export Buttons -->
+                        <div class="btn-group me-2" role="group">
+                            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="export_item_report.php?format=csv&category=<?php echo $category_id; ?>">
+                                        <i class="fas fa-file-csv"></i> Export as CSV
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="export_item_report.php?format=pdf&category=<?php echo $category_id; ?>">
+                                        <i class="fas fa-file-pdf"></i> Export as PDF
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
                         <button type="button" class="btn btn-outline-primary print-btn">
                             <i class="fas fa-print"></i> Print Report
                         </button>
