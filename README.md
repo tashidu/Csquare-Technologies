@@ -252,6 +252,6 @@ This project is developed as part of the Csquare Technologies internship assignm
 
 ---
 
-**Developed by**: [Your Name]  
-**Date**: [Current Date]  
+**Developed by**: Tashidu Vinuka 
+/*/*Date**:  07/06/2025
 **Version**: 1.0.0
